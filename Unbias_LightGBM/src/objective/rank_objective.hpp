@@ -429,6 +429,12 @@ private:
   /*! \brief pow position biases */
   mutable std::vector<label_t> j_biases_pow_; ///
 
+  // Defining attr bias for i and j
+
+  mutable std::vector<label_t> i_attr_biases_; /// mutable
+
+  mutable std::vector<label_t> j_attr_biases_; ///
+
   /*! \brief position cnts */
   mutable std::vector<long long> position_cnts_; ///
   mutable std::vector<std::vector<long long>> position_cnts_buffer_; ///

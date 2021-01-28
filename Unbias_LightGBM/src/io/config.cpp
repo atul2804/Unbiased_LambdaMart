@@ -334,6 +334,12 @@ void ObjectiveConfig::Set(const std::unordered_map<std::string, std::string>& pa
   CHECK(fair_c > 0);
   GetDouble(params, "poisson_max_delta_step", &poisson_max_delta_step);
   CHECK(poisson_max_delta_step > 0);
+  GetDouble(params, "grid_alpha", &grid_alpha);
+  CHECK(grid_alpha > 0.0f);
+  GetDouble(params, "grid_beta", &grid_beta);
+  CHECK(grid_beta > 0.0f);
+  GetDouble(params, "grid_gamma", &grid_gamma);
+  CHECK(grid_gamma > 0.0f);
   GetInt(params, "max_position", &max_position);
   CHECK(max_position > 0);
   GetInt(params, "position_bins", &position_bins);
@@ -447,12 +453,6 @@ void BoostingConfig::Set(const std::unordered_map<std::string, std::string>& par
   CHECK(bagging_fraction > 0.0f && bagging_fraction <= 1.0f);
   GetDouble(params, "learning_rate", &learning_rate);
   CHECK(learning_rate > 0.0f);
-  GetDouble(params, "grid_alpha", &grid_alpha);
-  CHECK(grid_alpha > 0.0f);
-  GetDouble(params, "grid_beta", &grid_beta);
-  CHECK(grid_beta > 0.0f);
-  GetDouble(params, "grid_gamma", &grid_gamma);
-  CHECK(grid_gamma > 0.0f);
   GetInt(params, "early_stopping_round", &early_stopping_round);
   CHECK(early_stopping_round >= 0);
   GetInt(params, "output_freq", &output_freq);
