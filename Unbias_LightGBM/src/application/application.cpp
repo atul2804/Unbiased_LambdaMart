@@ -47,9 +47,9 @@ Application::~Application() {
 
 void Application::LoadParameters(int argc, char** argv) {
   std::unordered_map<std::string, std::string> params;
-  Log::Warning("Number of Parameters : %d" % argc);
+//Log::Warning("Number of Parameters : %d" % argc);
   for (int i = 1; i < argc; ++i) {
-    Log::Warning("Parameters : %s" % argv[i]);
+  //  Log::Warning("Parameters : %s" % argv[i]);
     ConfigBase::KV2Map(params, argv[i]);
   }
   // check for alias
