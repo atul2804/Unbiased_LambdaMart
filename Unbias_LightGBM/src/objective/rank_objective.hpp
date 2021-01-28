@@ -214,8 +214,8 @@ public:
         //p_lambda *= -delta_pair_NDCG / i_biases_pow_[high_rank] / j_biases_pow_[low_rank]; /// -|deltaNDCG|*sigma/(1 + e^(sigma*(si-sj)))/bias, 梯度而不是负梯度
         //p_hessian *= 2 * delta_pair_NDCG / i_biases_pow_[high_rank] / j_biases_pow_[low_rank]; ///
         // Commented the default implementation above and adding new lambda calc below
-        p_lambda *= -delta_pair_NDCG
-        p_hessian *= 2 * delta_pair_NDCG
+        p_lambda *= -delta_pair_NDCG;
+        p_hessian *= 2 * delta_pair_NDCG;
 
         double p_cost_i = p_cost / j_biases_pow_[low_rank]; ///
         double p_cost_j = p_cost / i_biases_pow_[high_rank]; ///
