@@ -357,14 +357,14 @@ public:
       i_biases_pow_[i] = pow(i_biases_[i], _eta);
 
       // Update item attr bias here
-      i_attr_biases_[i] = 0.5
+      i_attr_biases_[i] = 0.5;
     }
     for (size_t i = 0; i < _position_bins; ++i) { ///
       j_biases_[i] = j_costs_[i] / j_costs_[0];
       j_biases_pow_[i] = pow(j_biases_[i], _eta);
 
       // Update item attr bias here
-      j_attr_biases_[i] = 0.5
+      j_attr_biases_[i] = 0.5;
     }
     // Clear Buffer
     for (size_t i = 0; i < _position_bins; ++i) { ///

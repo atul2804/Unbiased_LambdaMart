@@ -175,6 +175,12 @@ public:
   int position_bins = 12;
   // for unbiased lambdarank
   double eta = 0.5;
+  // for unbiased lambdarank
+  double grid_alpha = 0.1;
+  // for unbiased lambdarank
+  double grid_beta = 0.1;
+  // for unbiased lambdarank
+  double grid_gamma = 0.1;
   // for binary
   bool is_unbalance = false;
   // for multiclass
