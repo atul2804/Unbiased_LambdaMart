@@ -39,6 +39,7 @@ public:
     label_gain_.shrink_to_fit();
     // will optimize NDCG@optimize_pos_at_
     optimize_pos_at_ = config.max_position;
+    std::cout << "Optimizing NDCG @ : " << optimize_pos_at_ << std::endl;
     sigmoid_table_.clear();
     inverse_max_dcgs_.clear();
     if (sigmoid_ <= 0.0) {
@@ -170,7 +171,7 @@ public:
     for (data_size_t i = 0; i < cnt; ++i) {
       const data_size_t high = sorted_idx[i];
       const int high_label = static_cast<int>(label[high]);
-      const int high_rank = static_cast<int>(std::min(ranks_[start + high], _position_bins - 1)); /// high rank !!!-1
+      const int high_rank = static_cast<int>(std::min(ranks_[start + high] - 1, _position_bins - 1)); /// high rank !!!-1
       // std::cout << "high_rank: " << high_rank << std::endl;
       const double high_score = score[high];
       if (high_score == kMinScore) { continue; }
@@ -185,7 +186,7 @@ public:
         if (i == j) { continue; }
         const data_size_t low = sorted_idx[j];
         const int low_label = static_cast<int>(label[low]);
-        const int low_rank = static_cast<int>(std::min(ranks_[start + low], _position_bins - 1)); /// low rank !!!-1
+        const int low_rank = static_cast<int>(std::min(ranks_[start + low] - 1, _position_bins - 1)); /// low rank !!!-1
         const double low_score = score[low];
         // only consider pair with different label
         if (high_label <= low_label || low_score == kMinScore) { continue; } /// i is more relevant than j
@@ -210,8 +211,12 @@ public:
         double p_hessian = p_lambda * (2.0f - p_lambda); /// sigma=2
         double p_cost = log(2.0f / (2.0f - p_lambda)) * delta_pair_NDCG; /// log(1+e^(-sigma*(si-sj)))
         // update
-        p_lambda *= -delta_pair_NDCG / i_biases_pow_[high_rank] / j_biases_pow_[low_rank]; /// -|deltaNDCG|*sigma/(1 + e^(sigma*(si-sj)))/bias, 梯度而不是负梯度
-        p_hessian *= 2 * delta_pair_NDCG / i_biases_pow_[high_rank] / j_biases_pow_[low_rank]; ///
+        //p_lambda *= -delta_pair_NDCG / i_biases_pow_[high_rank] / j_biases_pow_[low_rank]; /// -|deltaNDCG|*sigma/(1 + e^(sigma*(si-sj)))/bias, 梯度而不是负梯度
+        //p_hessian *= 2 * delta_pair_NDCG / i_biases_pow_[high_rank] / j_biases_pow_[low_rank]; ///
+        // Commented the default implementation above and adding new lambda calc below
+        p_lambda *= -delta_pair_NDCG
+        p_hessian *= 2 * delta_pair_NDCG
+
         double p_cost_i = p_cost / j_biases_pow_[low_rank]; ///
         double p_cost_j = p_cost / i_biases_pow_[high_rank]; ///
 
@@ -219,10 +224,10 @@ public:
 	j_costs_buffer_[tid][low_rank] += p_cost_j;
         position_cnts_buffer_[tid][high_rank] += 1LL; /// Only consider clicked pair to conduct normalization
         pair_num += 1;
-        high_sum_lambda += p_lambda; /// Add lambda to position i
-        high_sum_hessian += p_hessian;
-        lambdas[low] -= static_cast<score_t>(p_lambda);  /// Minus lambda for position j
-        hessians[low] += static_cast<score_t>(p_hessian);
+        high_sum_lambda += p_lambda / i_attr_biases_[i]; /// Add lambda to position i
+        high_sum_hessian += p_hessian / i_attr_biases_[i];
+        lambdas[low] -= static_cast<score_t>((p_lambda / j_attr_biases_[j]));  /// Minus lambda for position j
+        hessians[low] += static_cast<score_t>((p_hessian) / j_attr_biases_[j]);
       }
       // update
       lambdas[high] += static_cast<score_t>(high_sum_lambda); /// accumulate lambda gradient
@@ -233,7 +238,7 @@ public:
 
     // calculate position score, lambda
     for (data_size_t i = 0; i < cnt; ++i) { ///
-      const int rank = static_cast<int>(std::min(ranks_[start + i], _position_bins - 1));
+      const int rank = static_cast<int>(std::min(ranks_[start + i] - 1, _position_bins - 1));
       position_scores_buffer_[tid][rank] += score[i];
       position_lambdas_buffer_[tid][rank] += lambdas[i];
     }
@@ -336,18 +341,18 @@ public:
               << std::setw(15) << "score"
               << std::setw(15) << "lambda"
               << std::setw(15) << "high_pair_cnt"
-              << std::setw(15) << "i_cost"
-              << std::setw(15) << "j_cost"
+              //<< std::setw(15) << "i_cost"
+              //<< std::setw(15) << "j_cost"
               << std::endl;
     for (size_t i = 0; i < _position_bins; ++i) { ///
       std::cout << std::setw(10) << i
-                << std::setw(15) << i_biases_pow_[i]
-                << std::setw(15) << j_biases_pow_[i]
+                << std::setw(15) << i_attr_biases_[i]
+                << std::setw(15) << j_attr_biases_[i]
                 << std::setw(15) << position_scores_[i] / num_queries_
                 << std::setw(15) << - position_lambdas_[i] / num_queries_
                 << std::setw(15) << 1.0f * position_cnts_[i] / position_cnts_sum
-                << std::setw(15) << i_costs_[i] / position_cnts_sum
-                << std::setw(15) << j_costs_[i] / position_cnts_sum
+                //<< std::setw(15) << i_costs_[i] / position_cnts_sum
+                //<< std::setw(15) << j_costs_[i] / position_cnts_sum
                 << std::endl;
     }
 
