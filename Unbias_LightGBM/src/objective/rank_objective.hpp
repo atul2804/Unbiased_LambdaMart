@@ -405,6 +405,12 @@ private:
   std::vector<double> inverse_max_dcgs_;
   /*! \brief Simgoid param */
   double sigmoid_;
+  /*! \brief grid alpha param */
+  double grid_alpha_;
+  /*! \brief grid beta param */
+  double grid_beta_;
+  /*! \brief grid gamma param */
+  double grid_gamma_;
   /*! \brief Optimized NDCG@ */
   int optimize_pos_at_;
   /*! \brief Number of queries */
