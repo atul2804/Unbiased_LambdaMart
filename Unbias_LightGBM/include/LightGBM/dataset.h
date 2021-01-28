@@ -228,6 +228,10 @@ private:
   void LoadWeights();
   /*! \brief Load ranks from file */
   void LoadRanks(); ///
+  /*! \brief Load prices from file */
+  void LoadPrices(); ///
+  /*! \brief Load item scores from file */
+  void LoadItemScores(); ///
   /*! \brief Load query boundaries from file */
   void LoadQueryBoundaries();
   /*! \brief Load query wights */
@@ -240,12 +244,20 @@ private:
   data_size_t num_weights_;
   /*! \brief Number of ranks, used to check correct rank file */
   data_size_t num_ranks_; ///
+  /*! \brief Number of item scores, used to check correct rank file */
+  data_size_t num_item_scores_; ///
+  /*! \brief Number of position, used to check correct rank file */
+  data_size_t num_prices_; ///
   /*! \brief Label data */
   std::vector<label_t> label_;
   /*! \brief Weights data */
   std::vector<label_t> weights_;
   /*! \brief ranks data */
   std::vector<size_t> ranks_; ///
+  /*! \brief prices data */
+  std::vector<size_t> prices_; ///
+  /*! \brief item scores data */
+  std::vector<size_t> item_scores_; ///
   /*! \brief Query boundaries */
   std::vector<data_size_t> query_boundaries_;
   /*! \brief Query weights */
@@ -264,6 +276,8 @@ private:
   bool rank_load_from_file_; ///
   bool query_load_from_file_;
   bool init_score_load_from_file_;
+  bool item_score_load_from_file_;
+  bool price_load_from_file_;
 };
 
 
@@ -474,7 +488,7 @@ public:
       return false;
     }
   }
-  
+
   inline int FeatureGroupNumBin(int group) const {
     return feature_groups_[group]->num_total_bin_;
   }
@@ -489,7 +503,7 @@ public:
     const int group = feature2group_[i];
     return feature_groups_[group]->bin_data_.get();
   }
-  
+
   inline const Bin* FeatureGroupBin(int group) const {
     return feature_groups_[group]->bin_data_.get();
   }
@@ -507,7 +521,7 @@ public:
   inline BinIterator* FeatureGroupIterator(int group) const {
     return feature_groups_[group]->FeatureGroupIterator();
   }
-  
+
   inline double RealThreshold(int i, uint32_t threshold) const {
     const int group = feature2group_[i];
     const int sub_feature = feature2subfeature_[i];

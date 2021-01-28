@@ -15,7 +15,7 @@ Metadata::Metadata() {
   num_queries_ = 0;
   // num_positions_ = 0;
   num_item_scores_ = 0;
-  num_prices = 0;
+  num_prices_ = 0;
   weight_load_from_file_ = false;
   rank_load_from_file_ = false; ///
   query_load_from_file_ = false;
@@ -422,6 +422,7 @@ void Metadata::LoadRanks() { ///
   }
   rank_load_from_file_ = true;
 }
+
 
 void Metadata::LoadPrices() { ///
   num_prices_ = 0;
