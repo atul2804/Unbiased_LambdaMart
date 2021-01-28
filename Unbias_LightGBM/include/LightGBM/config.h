@@ -250,6 +250,10 @@ public:
   bool is_provide_training_metric = false;
   int num_iterations = 100;
   double learning_rate = 0.1;
+  // Adding hyper params
+  double grid_alpha = 0.5;
+  double grid_beta = 0.5;
+  double grid_gamma = 0.5;
   double bagging_fraction = 1.0;
   int bagging_seed = 3;
   int bagging_freq = 0;
@@ -416,6 +420,9 @@ struct ParameterAlias {
       { "subsample", "bagging_fraction" },
       { "subsample_freq", "bagging_freq" },
       { "shrinkage_rate", "learning_rate" },
+      { "grid_alpha", "grid_alpha" },
+      { "grid_beta", "grid_beta" },
+      { "grid_gamma", "grid_gamma" },
       { "tree", "tree_learner" },
       { "num_machine", "num_machines" },
       { "local_port", "local_listen_port" },
@@ -491,13 +498,13 @@ struct ParameterAlias {
       "zero_as_missing", "init_score_file", "valid_init_score_file", "is_predict_contrib",
       "max_cat_threshold",  "cat_smooth", "min_data_per_group", "cat_l2", "max_cat_to_onehot",
       "alpha", "reg_sqrt", "tweedie_variance_power", "monotone_constraints", "max_delta_step",
-      "forced_splits", "position_bins", "eta"
+      "forced_splits", "position_bins", "eta", "grid_alpha", "grid_beta", "grid_gamma"
     });
     std::unordered_map<std::string, std::string> tmp_map;
     for (const auto& pair : *params) {
       auto alias = alias_table.find(pair.first);
       if (alias != alias_table.end()) { // found alias
-        auto alias_set = tmp_map.find(alias->second); 
+        auto alias_set = tmp_map.find(alias->second);
         if (alias_set != tmp_map.end()) { // alias already set
           // set priority by length & alphabetically to ensure reproducible behavior
           if (alias_set->second.size() < pair.first.size() ||
@@ -524,7 +531,7 @@ struct ParameterAlias {
         params->emplace(pair.first, params->at(pair.second));
         params->erase(pair.second);
       } else {
-        Log::Warning("%s is set=%s, %s=%s will be ignored. Current value: %s=%s", 
+        Log::Warning("%s is set=%s, %s=%s will be ignored. Current value: %s=%s",
           pair.first.c_str(), alias->second.c_str(), pair.second.c_str(), params->at(pair.second).c_str(),
           pair.first.c_str(), alias->second.c_str());
       }

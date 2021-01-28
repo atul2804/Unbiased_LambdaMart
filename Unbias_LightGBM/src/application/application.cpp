@@ -47,7 +47,9 @@ Application::~Application() {
 
 void Application::LoadParameters(int argc, char** argv) {
   std::unordered_map<std::string, std::string> params;
+  Log::Info("Number of Parameters : %d" % argc);
   for (int i = 1; i < argc; ++i) {
+    Log::Info("Parameters : %s" % argv[i]);
     ConfigBase::KV2Map(params, argv[i]);
   }
   // check for alias
@@ -165,6 +167,9 @@ void Application::LoadData() {
 }
 
 void Application::InitTrain() { /// 训练初始化
+  Log::Info("Grid alpha value : %f" % config_.grid_alpha);
+  Log::Info("Grid beta value : %f" % config_.grid_beta);
+  Log::Info("Grid gamma value : %f" % config_.grid_gamma);
   if (config_.is_parallel) {
     // need init network
     Network::Init(config_.network_config);

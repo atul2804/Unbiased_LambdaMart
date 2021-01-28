@@ -206,7 +206,7 @@ void OverallConfig::CheckParamConflict() {
   int num_class_check = boosting_config.num_class;
   bool objective_custom = objective_type == std::string("none") || objective_type == std::string("null") || objective_type == std::string("custom");
   bool objective_type_multiclass = CheckMultiClassObjective(objective_type) || (objective_custom && num_class_check > 1);
-  
+
   if (objective_type_multiclass) {
     if (num_class_check <= 1) {
       Log::Fatal("Number of classes should be specified and greater than 1 for multiclass training");
@@ -218,7 +218,7 @@ void OverallConfig::CheckParamConflict() {
   }
   if (boosting_config.is_provide_training_metric || !io_config.valid_data_filenames.empty()) {
     for (std::string metric_type : metric_types) {
-      bool metric_type_multiclass = (CheckMultiClassObjective(metric_type) 
+      bool metric_type_multiclass = (CheckMultiClassObjective(metric_type)
                                      || metric_type == std::string("multi_logloss")
                                      || metric_type == std::string("multi_error"));
       if ((objective_type_multiclass && !metric_type_multiclass)
@@ -259,7 +259,7 @@ void OverallConfig::CheckParamConflict() {
   // Check max_depth and num_leaves
   if (boosting_config.tree_config.max_depth > 0) {
     int full_num_leaves = static_cast<int>(std::pow(2, boosting_config.tree_config.max_depth));
-    if (full_num_leaves > boosting_config.tree_config.num_leaves 
+    if (full_num_leaves > boosting_config.tree_config.num_leaves
         && boosting_config.tree_config.num_leaves == kDefaultNumLeaves) {
       Log::Warning("Accuracy may be bad since you didn't set num_leaves and 2^max_depth > num_leaves");
     }
@@ -339,7 +339,7 @@ void ObjectiveConfig::Set(const std::unordered_map<std::string, std::string>& pa
   GetInt(params, "position_bins", &position_bins);
   CHECK(position_bins > 0);
   GetDouble(params, "eta", &eta);
-  CHECK(eta >= 0); 
+  CHECK(eta >= 0);
   eta = 1.0/(1.0 + eta);
   GetInt(params, "num_class", &num_class);
   CHECK(num_class > 0);
@@ -447,6 +447,12 @@ void BoostingConfig::Set(const std::unordered_map<std::string, std::string>& par
   CHECK(bagging_fraction > 0.0f && bagging_fraction <= 1.0f);
   GetDouble(params, "learning_rate", &learning_rate);
   CHECK(learning_rate > 0.0f);
+  GetDouble(params, "grid_alpha", &grid_alpha);
+  CHECK(grid_alpha > 0.0f);
+  GetDouble(params, "grid_beta", &grid_beta);
+  CHECK(grid_beta > 0.0f);
+  GetDouble(params, "grid_gamma", &grid_gamma);
+  CHECK(grid_gamma > 0.0f);
   GetInt(params, "early_stopping_round", &early_stopping_round);
   CHECK(early_stopping_round >= 0);
   GetInt(params, "output_freq", &output_freq);
