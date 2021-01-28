@@ -75,9 +75,9 @@ public:
     // get ranks
     ranks_ = metadata.ranks();
     // get item scores
-    // item_scores_ = metadata.scores();
+    item_scores_ = metadata.itemScores();
     // get prices
-    // prices_ = metadata.prices();
+    prices_ = metadata.prices();
 
     // get boundries
     query_boundaries_ = metadata.query_boundaries();
@@ -423,6 +423,8 @@ private:
   const label_t* weights_;
   /*! \brief Pointer of weights */
   const size_t* ranks_; ///
+  const size_t* prices_; ///
+  const size_t* item_scores_; ///
   /*! \brief Query boundries */
   const data_size_t* query_boundaries_;
   /*! \brief position biases */

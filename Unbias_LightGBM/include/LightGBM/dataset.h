@@ -167,6 +167,30 @@ public:
   }
 
   /*!
+  * \brief Get prices, if not exists, will return nullptr
+  * \return Pointer of prices
+  */
+  inline const size_t* prices() const { ///
+    if (!prices_.empty()) {
+      return prices_.data();
+    } else {
+      return nullptr;
+    }
+  }
+
+  /*!
+  * \brief Get item features scores, if not exists, will return nullptr
+  * \return Pointer of item scores
+  */
+  inline const size_t* itemScores() const { ///
+    if (!item_scores_.empty()) {
+      return item_scores_.data();
+    } else {
+      return nullptr;
+    }
+  }
+
+  /*!
   * \brief Get data boundaries on queries, if not exists, will return nullptr
   *        we assume data will order by query,
   *        the interval of [query_boundaris[i], query_boundaris[i+1])
