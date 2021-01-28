@@ -13,10 +13,16 @@ Metadata::Metadata() {
   num_init_score_ = 0;
   num_data_ = 0;
   num_queries_ = 0;
+  // num_positions_ = 0;
+  num_item_scores_ = 0;
+  num_prices = 0;
   weight_load_from_file_ = false;
   rank_load_from_file_ = false; ///
   query_load_from_file_ = false;
   init_score_load_from_file_ = false;
+  // position_score_load_from_file_ = false;
+  price_load_from_file_ = false;
+  item_score_load_from_file_ = false;
 }
 
 void Metadata::Init(const char * data_filename, const char* initscore_file) {
@@ -25,6 +31,9 @@ void Metadata::Init(const char * data_filename, const char* initscore_file) {
   LoadQueryBoundaries();
   LoadWeights();
   LoadRanks(); ///
+  LoadPrices();
+  // LoadPosition(); We can use ranks as position for now , later change it
+  LoadItemScores();
   // LoadQueryWeights(); /// queryweights只在评价指标上需要，模型训练过程中不需要
   LoadInitialScore(initscore_file);
 }
@@ -396,13 +405,13 @@ void Metadata::LoadRanks() { ///
   num_ranks_ = 0;
   std::string rank_filename(data_filename_);
   // default rank file name
-  rank_filename.append(".rank");
+  rank_filename.append(".position");
   TextReader<size_t> reader(rank_filename.c_str(), false);
   reader.ReadAllLines();
   if (reader.Lines().empty()) {
     return;
   }
-  Log::Info("Loading ranks...");
+  Log::Info("Loading position as ranks...");
   num_ranks_ = static_cast<data_size_t>(reader.Lines().size());
   ranks_ = std::vector<size_t>(num_ranks_);
 #pragma omp parallel for schedule(static)
@@ -413,6 +422,53 @@ void Metadata::LoadRanks() { ///
   }
   rank_load_from_file_ = true;
 }
+
+void Metadata::LoadPrices() { ///
+  num_prices_ = 0;
+  std::string price_filename(data_filename_);
+  // default rank file name
+  price_filename.append(".price");
+  TextReader<size_t> reader(price_filename.c_str(), false);
+  reader.ReadAllLines();
+  if (reader.Lines().empty()) {
+    return;
+  }
+  Log::Info("Loading prices...");
+  num_prices_ = static_cast<data_size_t>(reader.Lines().size());
+  prices_ = std::vector<size_t>(num_prices_);
+#pragma omp parallel for schedule(static)
+  for (data_size_t i = 0; i < num_prices_; ++i) {
+    int tmp_rank = 0;
+    Common::Atoi(reader.Lines()[i].c_str(), &tmp_rank);
+    prices_[i] = static_cast<size_t>(tmp_rank);
+  }
+  price_load_from_file_ = true;
+}
+
+
+void Metadata::LoadItemScores() { ///
+  num_item_scores_ = 0;
+  std::string scores_filename(data_filename_);
+  // default rank file name
+  scores_filename.append(".score");
+  TextReader<size_t> reader(scores_filename.c_str(), false);
+  reader.ReadAllLines();
+  if (reader.Lines().empty()) {
+    return;
+  }
+  Log::Info("Loading item attributes scores...");
+  num_item_scores_ = static_cast<data_size_t>(reader.Lines().size());
+  item_scores_ = std::vector<size_t>(num_item_scores_);
+#pragma omp parallel for schedule(static)
+  for (data_size_t i = 0; i < num_item_scores_; ++i) {
+    int tmp_rank = 0;
+    Common::Atoi(reader.Lines()[i].c_str(), &tmp_rank);
+    item_scores_[i] = static_cast<size_t>(tmp_rank);
+  }
+  item_score_load_from_file_ = true;
+}
+
+
 
 void Metadata::LoadInitialScore(const char* initscore_file) {
   num_init_score_ = 0;
@@ -492,7 +548,7 @@ void Metadata::LoadQueryWeights() {
   for (data_size_t i = 0; i < num_queries_; ++i) {
     query_weights_[i] = 0.0f;
     for (data_size_t j = query_boundaries_[i]; j < query_boundaries_[i + 1]; ++j) {
-      query_weights_[i] += weights_[j]; 
+      query_weights_[i] += weights_[j];
     }
     query_weights_[i] /= (query_boundaries_[i + 1] - query_boundaries_[i]); /// query_weights_是其doc weights的均值
   }

@@ -22,6 +22,14 @@ class LambdarankNDCG: public ObjectiveFunction {
 public:
   explicit LambdarankNDCG(const ObjectiveConfig& config) {
     sigmoid_ = static_cast<double>(config.sigmoid); /// 1.0
+
+    // Check for self defined param values
+    grid_alpha_ = static_cast<double>(config.grid_alpha);
+    grid_beta_ = static_cast<double>(config.grid_beta);
+    grid_gamma_ = static_cast<double>(config.grid_gamma);
+
+    std::cout << "Aplha : " << grid_alpha_ << " , Beta : " << grid_beta_ << " , Gamma : " << grid_gamma_ << std::endl;
+
     // initialize DCG calculator
     DCGCalculator::Init(config.label_gain);
     // copy lable gain to local
@@ -66,6 +74,11 @@ public:
     weights_ = metadata.weights();
     // get ranks
     ranks_ = metadata.ranks();
+    // get item scores
+    // item_scores_ = metadata.scores();
+    // get prices
+    // prices_ = metadata.prices();
+
     // get boundries
     query_boundaries_ = metadata.query_boundaries();
     if (query_boundaries_ == nullptr) {
@@ -91,10 +104,10 @@ public:
     // init position gradients
     InitPositionGradients(); //
     std::cout << "" << std::endl;
-    std::cout << std::setw(10) << "position" 
+    std::cout << std::setw(10) << "position"
               << std::setw(15) << "bias_i"
               << std::setw(15) << "bias_j"
-             
+
               << std::setw(15) << "i_cost"
               << std::setw(15) << "j_cost"
               << std::endl;
@@ -102,7 +115,7 @@ public:
       std::cout << std::setw(10) << i
                 << std::setw(15) << i_biases_pow_[i]
                 << std::setw(15) << j_biases_pow_[i]
-                
+
                 << std::setw(15) << i_costs_[i]
                 << std::setw(15) << j_costs_[i]
                 << std::endl;
@@ -201,11 +214,11 @@ public:
         p_hessian *= 2 * delta_pair_NDCG / i_biases_pow_[high_rank] / j_biases_pow_[low_rank]; ///
         double p_cost_i = p_cost / j_biases_pow_[low_rank]; ///
         double p_cost_j = p_cost / i_biases_pow_[high_rank]; ///
-	
+
 	high_sum_cost_i += p_cost_i;
 	j_costs_buffer_[tid][low_rank] += p_cost_j;
         position_cnts_buffer_[tid][high_rank] += 1LL; /// Only consider clicked pair to conduct normalization
-        pair_num += 1; 
+        pair_num += 1;
         high_sum_lambda += p_lambda; /// Add lambda to position i
         high_sum_hessian += p_hessian;
         lambdas[low] -= static_cast<score_t>(p_lambda);  /// Minus lambda for position j
@@ -215,7 +228,7 @@ public:
       lambdas[high] += static_cast<score_t>(high_sum_lambda); /// accumulate lambda gradient
       hessians[high] += static_cast<score_t>(high_sum_hessian);
       i_costs_buffer_[tid][high_rank] += high_sum_cost_i; ///
-      
+
     }
 
     // calculate position score, lambda
@@ -259,11 +272,20 @@ public:
     i_biases_pow_.resize(_position_bins);
     j_biases_.resize(_position_bins);
     j_biases_pow_.resize(_position_bins);
+
+    // Adding attribute prob score bias init here
+
+    i_attr_biases_.resize(_position_bins);
+    j_attr_biases_.resize(_position_bins);
+
     for (size_t i = 0; i < _position_bins; ++i) {
       i_biases_[i] = 1.0f;
       i_biases_pow_[i] = 1.0f;
       j_biases_[i] = 1.0f;
       j_biases_pow_[i] = 1.0f;
+
+      i_attr_biases_[i] = 1.0f;
+      j_attr_biases_[i] = 1.0f;
     }
   }
 
@@ -308,11 +330,11 @@ public:
     }
     std::cout << "" << std::endl;
     std::cout << "eta: " << _eta << ", pair_cnt_sum: " << position_cnts_sum << std::endl;
-    std::cout << std::setw(10) << "position" 
+    std::cout << std::setw(10) << "position"
               << std::setw(15) << "bias_i"
               << std::setw(15) << "bias_j"
-              << std::setw(15) << "score" 
-              << std::setw(15) << "lambda" 
+              << std::setw(15) << "score"
+              << std::setw(15) << "lambda"
               << std::setw(15) << "high_pair_cnt"
               << std::setw(15) << "i_cost"
               << std::setw(15) << "j_cost"
@@ -330,13 +352,19 @@ public:
     }
 
     // Update bias
-    for (size_t i = 0; i < _position_bins; ++i) { /// 
+    for (size_t i = 0; i < _position_bins; ++i) { ///
       i_biases_[i] = i_costs_[i] / i_costs_[0];
       i_biases_pow_[i] = pow(i_biases_[i], _eta);
+
+      // Update item attr bias here
+      i_attr_biases_[i] = 0.5
     }
-    for (size_t i = 0; i < _position_bins; ++i) { /// 
+    for (size_t i = 0; i < _position_bins; ++i) { ///
       j_biases_[i] = j_costs_[i] / j_costs_[0];
       j_biases_pow_[i] = pow(j_biases_[i], _eta);
+
+      // Update item attr bias here
+      j_attr_biases_[i] = 0.5
     }
     // Clear Buffer
     for (size_t i = 0; i < _position_bins; ++i) { ///
