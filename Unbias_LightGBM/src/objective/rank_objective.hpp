@@ -228,6 +228,8 @@ public:
         //position_cnts_buffer_[tid][high_rank] += 1LL; /// Only consider clicked pair to conduct normalization
         pair_num += 1;
         high_sum_lambda += p_lambda;
+        std::cout << "Lambda " << (p_lambda / i_attr_biases_[i]) << " i attrr : " << i_attr_biases_[i] << " j attr : " << i_attr_biases_[j] << std::endl;
+        std::cout << "Hessian " << p_hessian << " new hessian : " << (p_hessian/i_attr_biases_[i]) << std::endl;
         high_sum_hessian += p_hessian;
         lambdas[low] -= static_cast<score_t>((p_lambda));
         hessians[low] += static_cast<score_t>((p_hessian));
@@ -346,7 +348,7 @@ public:
     double overall_item_decay = 1.0;
     int row_item = 1;
     for (size_t i = 0; i < _position_bins; ++i) { ///
-      std::cout << "Item scores " << item_scores_[i] << std::endl;
+      //std::cout << "Item scores " << item_scores_[i] << std::endl;
       // Update item attr bias here
       item_decay_ = 1.0;
       overall_item_decay = 1.0;
