@@ -55,7 +55,7 @@ public:
     //{
     //  num_threads_ = omp_get_num_threads();
     //}
-    num_threads_ = 1
+    num_threads_ = 1;
     std::cout << "num_threads_: " << num_threads_ << std::endl;
   }
 
