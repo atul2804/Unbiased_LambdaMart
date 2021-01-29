@@ -348,7 +348,7 @@ public:
       for (size_t j = 0; j < i; ++j) {
         //std::cout << "Inside j loop " << std::endl;
         row_item = j / 5;
-        item_decay_ = std::min((pow(grid_beta_, row_item)) * grid_alpha_, 1.0);
+        item_decay_ = std::min((pow(grid_beta_, row_item + (grid_gamma_ * item_scores_[i]))) * grid_alpha_, 1.0);   // Need to add price here as well
         overall_item_decay *= item_decay_;
       }
       i_attr_biases_[i] = overall_item_decay;
