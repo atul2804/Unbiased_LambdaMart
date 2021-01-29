@@ -50,12 +50,12 @@ public:
     _eta = config.eta;
 
     /// get number of threads
-    #pragma omp parallel
-    #pragma omp master
-    {
-      num_threads_ = omp_get_num_threads();
-    }
-
+    //#pragma omp parallel
+    //#pragma omp master
+    //{
+    //  num_threads_ = omp_get_num_threads();
+    //}
+    num_threads_ = 1
     std::cout << "num_threads_: " << num_threads_ << std::endl;
   }
 
@@ -88,7 +88,7 @@ public:
     num_queries_ = metadata.num_queries();
     // cache inverse max DCG, avoid computation many times
     inverse_max_dcgs_.resize(num_queries_);
-#pragma omp parallel for schedule(static)
+//#pragma omp parallel for schedule(static)
     for (data_size_t i = 0; i < num_queries_; ++i) {
       inverse_max_dcgs_[i] = DCGCalculator::CalMaxDCGAtK(optimize_pos_at_,
         label_ + query_boundaries_[i],
@@ -125,7 +125,7 @@ public:
 
   void GetGradients(const double* score, score_t* gradients,
                     score_t* hessians) const override {
-    #pragma omp parallel for schedule(guided)
+    //#pragma omp parallel for schedule(guided)
     for (data_size_t i = 0; i < num_queries_; ++i) {
       GetGradientsForOneQuery(score, gradients, hessians, i);
     }
@@ -133,10 +133,11 @@ public:
     UpdatePositionBiases(); // Finish one epoch, update the position bias
   }
 
+
   inline void GetGradientsForOneQuery(const double* score,
               score_t* lambdas, score_t* hessians, data_size_t query_id) const {
-    const int tid = omp_get_thread_num(); // get thread ID
-
+    //const int tid = omp_get_thread_num(); // get thread ID
+    const int tid = 0;
     // get doc boundary for current query
     const data_size_t start = query_boundaries_[query_id];
     const data_size_t cnt =
