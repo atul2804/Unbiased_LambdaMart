@@ -353,7 +353,7 @@ public:
     }
 
     std::cout << "" << std::endl;
-    std::cout << "eta: " << _eta << ", pair_cnt_sum: " << position_cnts_sum << std::endl;
+    std::cout << "eta: " << _eta << std::endl;
     std::cout << std::setw(10) << "position"
               << std::setw(15) << "bias_i"
               << std::setw(15) << "bias_j"
