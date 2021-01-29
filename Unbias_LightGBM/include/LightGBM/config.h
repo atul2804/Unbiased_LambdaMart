@@ -172,7 +172,7 @@ public:
   // for lambdarank
   int max_position = 10;
   // for unbiased lambdarank
-  int position_bins = 40;
+  int position_bins = 128;
   // for unbiased lambdarank
   double eta = 0.5;
   // for unbiased lambdarank
