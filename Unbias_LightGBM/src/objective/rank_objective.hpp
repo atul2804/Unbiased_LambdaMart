@@ -137,7 +137,7 @@ public:
   inline void GetGradientsForOneQuery(const double* score,
               score_t* lambdas, score_t* hessians, data_size_t query_id) const {
     //const int tid = omp_get_thread_num(); // get thread ID
-    const int tid = 0;
+    // const int tid = 0;
     // get doc boundary for current query
     const data_size_t start = query_boundaries_[query_id];
     const data_size_t cnt =
@@ -172,7 +172,7 @@ public:
     for (data_size_t i = 0; i < cnt; ++i) {
       const data_size_t high = sorted_idx[i];
       const int high_label = static_cast<int>(label[high]);
-      const int high_rank = static_cast<int>(std::min(ranks_[start + high] - 1, _position_bins - 1)); /// high rank !!!-1
+      //const int high_rank = static_cast<int>(std::min(ranks_[start + high] - 1, _position_bins - 1)); /// high rank !!!-1
       // std::cout << "high_rank: " << high_rank << std::endl;
       const double high_score = score[high];
       if (high_score == kMinScore) { continue; }
@@ -180,14 +180,14 @@ public:
       const double high_discount = DCGCalculator::GetDiscount(i); /// 1 / log2(2 + i)
       double high_sum_lambda = 0.0;
       double high_sum_hessian = 0.0;
-      double high_sum_cost_i = 0.0; ///
+      //double high_sum_cost_i = 0.0; ///
       int pair_num = 0; ///
       for (data_size_t j = 0; j < cnt; ++j) {
         // skip same data
         if (i == j) { continue; }
         const data_size_t low = sorted_idx[j];
         const int low_label = static_cast<int>(label[low]);
-        const int low_rank = static_cast<int>(std::min(ranks_[start + low] - 1, _position_bins - 1)); /// low rank !!!-1
+        //const int low_rank = static_cast<int>(std::min(ranks_[start + low] - 1, _position_bins - 1)); /// low rank !!!-1
         const double low_score = score[low];
         // only consider pair with different label
         if (high_label <= low_label || low_score == kMinScore) { continue; } /// i is more relevant than j
@@ -210,7 +210,7 @@ public:
         // calculate lambda for this pair
         double p_lambda = GetSigmoid(delta_score); /// sigma / (1 + e^(sigma*(si-sj)))
         double p_hessian = p_lambda * (2.0f - p_lambda); /// sigma=2
-        double p_cost = log(2.0f / (2.0f - p_lambda)) * delta_pair_NDCG; /// log(1+e^(-sigma*(si-sj)))
+        //double p_cost = log(2.0f / (2.0f - p_lambda)) * delta_pair_NDCG; /// log(1+e^(-sigma*(si-sj)))
         // update
         //p_lambda *= -delta_pair_NDCG / i_biases_pow_[high_rank] / j_biases_pow_[low_rank]; /// -|deltaNDCG|*sigma/(1 + e^(sigma*(si-sj)))/bias, 梯度而不是负梯度
         //p_hessian *= 2 * delta_pair_NDCG / i_biases_pow_[high_rank] / j_biases_pow_[low_rank]; ///
