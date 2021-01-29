@@ -340,13 +340,15 @@ public:
     // Update bias
     double item_decay_ = 1.0;
     double overall_item_decay = 1.0;
+    int row_item = 1;
     for (size_t i = 0; i < _position_bins; ++i) { ///
       // Update item attr bias here
       item_decay_ = 1.0;
       overall_item_decay = 1.0;
       for (size_t j = 0; j < i; ++j) {
-        std::cout << "Inside j loop " << std::endl;
-        item_decay_ = std::min(grid_beta_ * grid_alpha_, 1.0);
+        //std::cout << "Inside j loop " << std::endl;
+        row_item = j / 5;
+        item_decay_ = std::min((pow(grid_beta_, _eta)) * grid_alpha_, 1.0);
         overall_item_decay *= item_decay_;
       }
       i_attr_biases_[i] = overall_item_decay;
