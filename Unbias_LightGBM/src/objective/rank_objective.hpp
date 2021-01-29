@@ -102,6 +102,8 @@ public:
     ConstructSigmoidTable();
     // init position biases
     InitPositionBiases(); ///
+    // Update position biases
+    UpdatePositionBiases();
     // init position gradients
     InitPositionGradients(); //
     std::cout << "" << std::endl;
@@ -227,8 +229,8 @@ public:
         pair_num += 1;
         high_sum_lambda += p_lambda / i_attr_biases_[i]; /// Add lambda to position i
         high_sum_hessian += p_hessian / i_attr_biases_[i];
-        lambdas[low] -= static_cast<score_t>((p_lambda / j_attr_biases_[j]));  /// Minus lambda for position j
-        hessians[low] += static_cast<score_t>((p_hessian) / j_attr_biases_[j]);
+        lambdas[low] -= static_cast<score_t>((p_lambda / i_attr_biases_[j]));  /// Minus lambda for position j
+        hessians[low] += static_cast<score_t>((p_hessian) / i_attr_biases_[j]);
       }
       // update
       lambdas[high] += static_cast<score_t>(high_sum_lambda); /// accumulate lambda gradient
@@ -330,10 +332,26 @@ public:
       }
     } */
 
-    long long position_cnts_sum = 0LL;
+    /*long long position_cnts_sum = 0LL;
     for (size_t i = 0; i < _position_bins; ++i) {
       position_cnts_sum += position_cnts_[i];
+    } */
+
+    // Update bias
+    double item_decay_ = 1.0;
+    double overall_item_decay = 1.0;
+    for (size_t i = 0; i < _position_bins; ++i) { ///
+      // Update item attr bias here
+      item_decay_ = 1.0;
+      overall_item_decay = 1.0;
+      for (size_t j = 0; j < i; ++j) {
+        std::cout << "Inside j loop " << std::endl;
+        item_decay_ = std::min(grid_beta_ * grid_alpha_, 1.0);
+        overall_item_decay *= item_decay_;
+      }
+      i_attr_biases_[i] = overall_item_decay;
     }
+
     std::cout << "" << std::endl;
     std::cout << "eta: " << _eta << ", pair_cnt_sum: " << position_cnts_sum << std::endl;
     std::cout << std::setw(10) << "position"
@@ -347,21 +365,14 @@ public:
                 << std::endl;
     }
 
-    // Update bias
-    for (size_t i = 0; i < _position_bins; ++i) { ///
-      i_biases_[i] = i_costs_[i] / i_costs_[0];
-      i_biases_pow_[i] = pow(i_biases_[i], _eta);
 
-      // Update item attr bias here
-      i_attr_biases_[i] = 0.5;
-    }
-    for (size_t i = 0; i < _position_bins; ++i) { ///
+    /*for (size_t i = 0; i < _position_bins; ++i) { ///
       j_biases_[i] = j_costs_[i] / j_costs_[0];
       j_biases_pow_[i] = pow(j_biases_[i], _eta);
 
       // Update item attr bias here
       j_attr_biases_[i] = 0.5;
-    }
+    } */
 
   }
 
