@@ -174,7 +174,7 @@ public:
     for (data_size_t i = 0; i < cnt; ++i) {
       const data_size_t high = sorted_idx[i];
       const int high_label = static_cast<int>(label[high]);
-      //const int high_rank = static_cast<int>(std::min(ranks_[start + high] - 1, _position_bins - 1)); /// high rank !!!-1
+      const int high_rank = static_cast<int>(std::min(ranks_[start + high] - 1, _position_bins - 1)); /// high rank !!!-1
       // std::cout << "high_rank: " << high_rank << std::endl;
       const double high_score = score[high];
       if (high_score == kMinScore) { continue; }
@@ -189,7 +189,7 @@ public:
         if (i == j) { continue; }
         const data_size_t low = sorted_idx[j];
         const int low_label = static_cast<int>(label[low]);
-        //const int low_rank = static_cast<int>(std::min(ranks_[start + low] - 1, _position_bins - 1)); /// low rank !!!-1
+        const int low_rank = static_cast<int>(std::min(ranks_[start + low] - 1, _position_bins - 1)); /// low rank !!!-1
         const double low_score = score[low];
         // only consider pair with different label
         if (high_label <= low_label || low_score == kMinScore) { continue; } /// i is more relevant than j
@@ -220,23 +220,31 @@ public:
         p_lambda *= -delta_pair_NDCG;
         p_hessian *= 2 * delta_pair_NDCG;
 
-        //double p_cost_i = p_cost / j_biases_pow_[low_rank]; ///
-        //double p_cost_j = p_cost / i_biases_pow_[high_rank]; ///
-
-	//high_sum_cost_i += p_cost_i;
-	//j_costs_buffer_[tid][low_rank] += p_cost_j;
-        //position_cnts_buffer_[tid][high_rank] += 1LL; /// Only consider clicked pair to conduct normalization
         pair_num += 1;
-        //high_sum_lambda += p_lambda;
-        //std::cout << "Lambda " << (p_lambda / i_attr_biases_[i]) << " i attrr : " << i_attr_biases_[i] << " j attr : " << i_attr_biases_[j] << std::endl;
-        //std::cout << "Hessian " << p_hessian << " new hessian : " << (p_hessian/i_attr_biases_[i]) << std::endl;
-        //high_sum_hessian += p_hessian;
-        //lambdas[low] -= static_cast<score_t>((p_lambda));
-        //hessians[low] += static_cast<score_t>((p_hessian));
-        high_sum_lambda += p_lambda / i_attr_biases_[i]; /// Add lambda to position i
-        high_sum_hessian += p_hessian / i_attr_biases_[i];
-        lambdas[low] -= static_cast<score_t>((p_lambda / i_attr_biases_[j]));  /// Minus lambda for position j
-        hessians[low] += static_cast<score_t>((p_hessian) / i_attr_biases_[j]);
+        // calculate bias here
+
+        double item_decay_ = 1.0;
+        double overall_item_decay = 1.0;
+        int row_item = 0;
+        for (size_t k = 0; k < low; k++) {
+            row_item = k / 5;
+            item_decay_ = std::min((pow(grid_beta_, row_item + (grid_gamma_ * item_scores_[low_rank]))) * grid_alpha_, 1.0);   // Need to add price here as well
+            overall_item_decay *= item_decay_;
+        }
+
+        double item_decay_high_ = 1.0;
+        double overall_item_decay_high_ = 1.0;
+        row_item = 0;
+        for (size_t k = 0; k < high; k++) {
+            row_item = k / 5;
+            item_decay_high_ = std::min((pow(grid_beta_, row_item + (grid_gamma_ * item_scores_[high_rank]))) * grid_alpha_, 1.0);   // Need to add price here as well
+            overall_item_decay_high_ *= item_decay_high_;
+        }
+
+        high_sum_lambda += p_lambda / overall_item_decay_high_; /// Add lambda to position i
+        high_sum_hessian += p_hessian / overall_item_decay_high_;
+        lambdas[low] -= static_cast<score_t>((p_lambda / overall_item_decay));  /// Minus lambda for position j
+        hessians[low] += static_cast<score_t>((p_hessian) / overall_item_decay);
       }
       // update
       lambdas[high] += static_cast<score_t>(high_sum_lambda); /// accumulate lambda gradient
