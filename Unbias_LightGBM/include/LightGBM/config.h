@@ -170,9 +170,9 @@ public:
   // for lambdarank
   std::vector<double> label_gain;
   // for lambdarank
-  int max_position = 20;
+  int max_position = 10;
   // for unbiased lambdarank
-  int position_bins = 25;
+  int position_bins = 40;
   // for unbiased lambdarank
   double eta = 0.5;
   // for unbiased lambdarank

@@ -346,10 +346,11 @@ public:
     double overall_item_decay = 1.0;
     int row_item = 1;
     for (size_t i = 0; i < _position_bins; ++i) { ///
+      std::cout << "Item scores " << item_scores_[i] << std::endl;
       // Update item attr bias here
       item_decay_ = 1.0;
       overall_item_decay = 1.0;
-      for (size_t j = 0; j < i; ++j) {
+      for (size_t j = 0; j <= i; j++) {
         //std::cout << "Inside j loop " << std::endl;
         row_item = j / 5;
         item_decay_ = std::min((pow(grid_beta_, row_item + (grid_gamma_ * item_scores_[i]))) * grid_alpha_, 1.0);   // Need to add price here as well
@@ -357,6 +358,7 @@ public:
       }
       i_attr_biases_[i] = overall_item_decay;
     }
+
 
     std::cout << "" << std::endl;
     std::cout << "eta: " << _eta << std::endl;
