@@ -227,10 +227,14 @@ public:
 	//j_costs_buffer_[tid][low_rank] += p_cost_j;
         //position_cnts_buffer_[tid][high_rank] += 1LL; /// Only consider clicked pair to conduct normalization
         pair_num += 1;
-        high_sum_lambda += p_lambda / i_attr_biases_[i]; /// Add lambda to position i
-        high_sum_hessian += p_hessian / i_attr_biases_[i];
-        lambdas[low] -= static_cast<score_t>((p_lambda / i_attr_biases_[j]));  /// Minus lambda for position j
-        hessians[low] += static_cast<score_t>((p_hessian) / i_attr_biases_[j]);
+        high_sum_lambda += p_lambda
+        high_sum_hessian += p_hessian
+        lambdas[low] -= static_cast<score_t>((p_lambda))
+        hessians[low] += static_cast<score_t>((p_hessian))
+        //high_sum_lambda += p_lambda / i_attr_biases_[i]; /// Add lambda to position i
+        //high_sum_hessian += p_hessian / i_attr_biases_[i];
+        //lambdas[low] -= static_cast<score_t>((p_lambda / i_attr_biases_[j]));  /// Minus lambda for position j
+        //hessians[low] += static_cast<score_t>((p_hessian) / i_attr_biases_[j]);
       }
       // update
       lambdas[high] += static_cast<score_t>(high_sum_lambda); /// accumulate lambda gradient
