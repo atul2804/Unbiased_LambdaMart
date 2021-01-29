@@ -348,7 +348,7 @@ public:
       for (size_t j = 0; j < i; ++j) {
         //std::cout << "Inside j loop " << std::endl;
         row_item = j / 5;
-        item_decay_ = std::min((pow(grid_beta_, _eta)) * grid_alpha_, 1.0);
+        item_decay_ = std::min((pow(grid_beta_, row_item)) * grid_alpha_, 1.0);
         overall_item_decay *= item_decay_;
       }
       i_attr_biases_[i] = overall_item_decay;
