@@ -130,7 +130,7 @@ public:
       GetGradientsForOneQuery(score, gradients, hessians, i);
     }
 
-    UpdatePositionBiases(); // Finish one epoch, update the position bias
+    //UpdatePositionBiases(); // Finish one epoch, update the position bias
   }
 
 
@@ -218,12 +218,12 @@ public:
         p_lambda *= -delta_pair_NDCG;
         p_hessian *= 2 * delta_pair_NDCG;
 
-        double p_cost_i = p_cost / j_biases_pow_[low_rank]; ///
-        double p_cost_j = p_cost / i_biases_pow_[high_rank]; ///
+        //double p_cost_i = p_cost / j_biases_pow_[low_rank]; ///
+        //double p_cost_j = p_cost / i_biases_pow_[high_rank]; ///
 
-	high_sum_cost_i += p_cost_i;
-	j_costs_buffer_[tid][low_rank] += p_cost_j;
-        position_cnts_buffer_[tid][high_rank] += 1LL; /// Only consider clicked pair to conduct normalization
+	//high_sum_cost_i += p_cost_i;
+	//j_costs_buffer_[tid][low_rank] += p_cost_j;
+        //position_cnts_buffer_[tid][high_rank] += 1LL; /// Only consider clicked pair to conduct normalization
         pair_num += 1;
         high_sum_lambda += p_lambda / i_attr_biases_[i]; /// Add lambda to position i
         high_sum_hessian += p_hessian / i_attr_biases_[i];
@@ -233,16 +233,16 @@ public:
       // update
       lambdas[high] += static_cast<score_t>(high_sum_lambda); /// accumulate lambda gradient
       hessians[high] += static_cast<score_t>(high_sum_hessian);
-      i_costs_buffer_[tid][high_rank] += high_sum_cost_i; ///
+      //i_costs_buffer_[tid][high_rank] += high_sum_cost_i; ///
 
     }
 
     // calculate position score, lambda
-    for (data_size_t i = 0; i < cnt; ++i) { ///
+    /*for (data_size_t i = 0; i < cnt; ++i) { ///
       const int rank = static_cast<int>(std::min(ranks_[start + i] - 1, _position_bins - 1));
       position_scores_buffer_[tid][rank] += score[i];
       position_lambdas_buffer_[tid][rank] += lambdas[i];
-    }
+    } */
   }
 
 
@@ -320,7 +320,7 @@ public:
 
   void UpdatePositionBiases() const {
     // accumulate the parallel results
-    for (int i = 0; i < num_threads_; i++) {
+    /*for (int i = 0; i < num_threads_; i++) {
       for (size_t j = 0; j < _position_bins; ++j) {
         position_cnts_[j] += position_cnts_buffer_[i][j];
         position_scores_[j] += position_scores_buffer_[i][j];
@@ -328,7 +328,7 @@ public:
         i_costs_[j] += i_costs_buffer_[i][j];
         j_costs_[j] += j_costs_buffer_[i][j];
       }
-    }
+    } */
 
     long long position_cnts_sum = 0LL;
     for (size_t i = 0; i < _position_bins; ++i) {
@@ -339,21 +339,11 @@ public:
     std::cout << std::setw(10) << "position"
               << std::setw(15) << "bias_i"
               << std::setw(15) << "bias_j"
-              << std::setw(15) << "score"
-              << std::setw(15) << "lambda"
-              << std::setw(15) << "high_pair_cnt"
-              //<< std::setw(15) << "i_cost"
-              //<< std::setw(15) << "j_cost"
               << std::endl;
     for (size_t i = 0; i < _position_bins; ++i) { ///
       std::cout << std::setw(10) << i
                 << std::setw(15) << i_attr_biases_[i]
                 << std::setw(15) << j_attr_biases_[i]
-                << std::setw(15) << position_scores_[i] / num_queries_
-                << std::setw(15) << - position_lambdas_[i] / num_queries_
-                << std::setw(15) << 1.0f * position_cnts_[i] / position_cnts_sum
-                //<< std::setw(15) << i_costs_[i] / position_cnts_sum
-                //<< std::setw(15) << j_costs_[i] / position_cnts_sum
                 << std::endl;
     }
 
@@ -372,24 +362,7 @@ public:
       // Update item attr bias here
       j_attr_biases_[i] = 0.5;
     }
-    // Clear Buffer
-    for (size_t i = 0; i < _position_bins; ++i) { ///
-      position_cnts_[i] = 0LL;
-      position_scores_[i] = 0.0f;
-      position_lambdas_[i] = 0.0f;
-      i_costs_[i] = 0.0f;
-      j_costs_[i] = 0.0f;
-    }
 
-    for (int i = 0; i < num_threads_; i++) {
-      for (size_t j = 0; j < _position_bins; ++j) {
-        position_cnts_buffer_[i][j] = 0LL;
-        position_scores_buffer_[i][j] = 0.0f;
-        position_lambdas_buffer_[i][j] = 0.0f;
-        i_costs_buffer_[i][j] = 0.0f;
-        j_costs_buffer_[i][j] = 0.0f;
-      }
-    }
   }
 
   const char* GetName() const override {
