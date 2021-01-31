@@ -340,6 +340,8 @@ void ObjectiveConfig::Set(const std::unordered_map<std::string, std::string>& pa
   CHECK(grid_beta >= 0.0f);
   GetDouble(params, "grid_gamma", &grid_gamma);
   CHECK(grid_gamma >= 0.0f);
+  GetDouble(params, "price_gamma", &price_gamma);
+  CHECK(price_gamma >= 0.0f);
   GetInt(params, "max_position", &max_position);
   CHECK(max_position > 0);
   GetInt(params, "position_bins", &position_bins);
