@@ -186,7 +186,7 @@ public:
       double item_decay_high_ = 1.0;
       double overall_item_decay_high_ = 1.0;
       int row_item = 0;
-      for (size_t k = 0; k < high; k++) {
+      for (int k = 0; k < high_rank; k++) {
           row_item = k / 5;
           item_decay_high_ = std::min((pow(grid_beta_, row_item + (grid_gamma_ * item_scores_[high_rank]))) * grid_alpha_, 1.0);   // Need to add price here as well
           overall_item_decay_high_ *= item_decay_high_;
@@ -236,7 +236,7 @@ public:
         double item_decay_ = 1.0;
         double overall_item_decay = 1.0;
         row_item = 0;
-        for (size_t k = 0; k < low; k++) {
+        for (int k = 0; k < low_rank; k++) {
             row_item = k / 5;
             item_decay_ = std::min((pow(grid_beta_, row_item + (grid_gamma_ * item_scores_[low_rank]))) * grid_alpha_, 1.0);   // Need to add price here as well
             overall_item_decay *= item_decay_;
