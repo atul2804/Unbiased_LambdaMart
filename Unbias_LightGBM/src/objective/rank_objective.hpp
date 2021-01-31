@@ -27,9 +27,10 @@ public:
     grid_alpha_ = static_cast<double>(config.grid_alpha);
     grid_beta_ = static_cast<double>(config.grid_beta);
     grid_gamma_ = static_cast<double>(config.grid_gamma);
-    price_gamma_ = static_cast<double>(config.price_gamma_);
+    price_gamma_ = static_cast<double>(config.price_gamma);
 
     std::cout << "Aplha : " << grid_alpha_ << " , Beta : " << grid_beta_ << " , Gamma : " << grid_gamma_ << std::endl;
+    std::cout << "Price Gamma : " << price_gamma_ << std::endl;
 
     // initialize DCG calculator
     DCGCalculator::Init(config.label_gain);
@@ -451,7 +452,7 @@ private:
 
   mutable std::vector<label_t> j_attr_biases_; ///
 
-  mutable std::vector<double> item_attr_biases_; /// mutable
+  mutable std::vector<double> item_attr_bias_; /// mutable
 
   /*! \brief position cnts */
   mutable std::vector<long long> position_cnts_; ///
