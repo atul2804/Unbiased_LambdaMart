@@ -182,6 +182,16 @@ public:
       const double high_discount = DCGCalculator::GetDiscount(i); /// 1 / log2(2 + i)
       double high_sum_lambda = 0.0;
       double high_sum_hessian = 0.0;
+
+      double item_decay_high_ = 1.0;
+      double overall_item_decay_high_ = 1.0;
+      int row_item = 0;
+      for (size_t k = 0; k < high; k++) {
+          row_item = k / 5;
+          item_decay_high_ = std::min((pow(grid_beta_, row_item + (grid_gamma_ * item_scores_[high_rank]))) * grid_alpha_, 1.0);   // Need to add price here as well
+          overall_item_decay_high_ *= item_decay_high_;
+      }
+
       //double high_sum_cost_i = 0.0; ///
       int pair_num = 0; ///
       for (data_size_t j = 0; j < cnt; ++j) {
@@ -225,20 +235,11 @@ public:
 
         double item_decay_ = 1.0;
         double overall_item_decay = 1.0;
-        int row_item = 0;
+        row_item = 0;
         for (size_t k = 0; k < low; k++) {
             row_item = k / 5;
             item_decay_ = std::min((pow(grid_beta_, row_item + (grid_gamma_ * item_scores_[low_rank]))) * grid_alpha_, 1.0);   // Need to add price here as well
             overall_item_decay *= item_decay_;
-        }
-
-        double item_decay_high_ = 1.0;
-        double overall_item_decay_high_ = 1.0;
-        row_item = 0;
-        for (size_t k = 0; k < high; k++) {
-            row_item = k / 5;
-            item_decay_high_ = std::min((pow(grid_beta_, row_item + (grid_gamma_ * item_scores_[high_rank]))) * grid_alpha_, 1.0);   // Need to add price here as well
-            overall_item_decay_high_ *= item_decay_high_;
         }
 
         high_sum_lambda += p_lambda / overall_item_decay_high_; /// Add lambda to position i
