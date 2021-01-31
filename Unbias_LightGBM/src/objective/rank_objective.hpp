@@ -52,12 +52,12 @@ public:
     _eta = config.eta;
 
     /// get number of threads
-    //#pragma omp parallel
-    //#pragma omp master
-    //{
-    //  num_threads_ = omp_get_num_threads();
-    //}
-    num_threads_ = 1;
+    #pragma omp parallel
+    #pragma omp master
+    {
+      num_threads_ = omp_get_num_threads();
+    }
+    //num_threads_ = 1;
     std::cout << "num_threads_: " << num_threads_ << std::endl;
   }
 
@@ -105,31 +105,15 @@ public:
     // init position biases
     InitPositionBiases(); ///
     // Update position biases
-    UpdatePositionBiases();
+    //UpdatePositionBiases();
     // init position gradients
     InitPositionGradients(); //
     std::cout << "" << std::endl;
-    /*std::cout << std::setw(10) << "position"
-              << std::setw(15) << "bias_i"
-              << std::setw(15) << "bias_j"
-
-              << std::setw(15) << "i_cost"
-              << std::setw(15) << "j_cost"
-              << std::endl;
-    for (size_t i = 0; i < _position_bins; ++i) { ///
-      std::cout << std::setw(10) << i
-                << std::setw(15) << i_biases_pow_[i]
-                << std::setw(15) << j_biases_pow_[i]
-
-                << std::setw(15) << i_costs_[i]
-                << std::setw(15) << j_costs_[i]
-                << std::endl;
-    } */
   }
 
   void GetGradients(const double* score, score_t* gradients,
                     score_t* hessians) const override {
-    //#pragma omp parallel for schedule(guided)
+    #pragma omp parallel for schedule(guided)
     for (data_size_t i = 0; i < num_queries_; ++i) {
       GetGradientsForOneQuery(score, gradients, hessians, i);
     }
