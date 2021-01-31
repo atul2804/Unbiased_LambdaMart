@@ -179,6 +179,7 @@ public:
   double grid_alpha = 0.1;
   // for unbiased lambdarank
   double grid_beta = 0.1;
+  double price_gamma = 0.1;
   // for unbiased lambdarank
   double grid_gamma = 0.1;
   // for binary
@@ -260,6 +261,7 @@ public:
   double grid_alpha = 0.5;
   double grid_beta = 0.5;
   double grid_gamma = 0.5;
+  double price_gamma = 0.5;
   double bagging_fraction = 1.0;
   int bagging_seed = 3;
   int bagging_freq = 0;
@@ -429,6 +431,7 @@ struct ParameterAlias {
       { "grid_alpha", "grid_alpha" },
       { "grid_beta", "grid_beta" },
       { "grid_gamma", "grid_gamma" },
+      { "price_gamma", "price_gamma" },
       { "tree", "tree_learner" },
       { "num_machine", "num_machines" },
       { "local_port", "local_listen_port" },
@@ -504,7 +507,7 @@ struct ParameterAlias {
       "zero_as_missing", "init_score_file", "valid_init_score_file", "is_predict_contrib",
       "max_cat_threshold",  "cat_smooth", "min_data_per_group", "cat_l2", "max_cat_to_onehot",
       "alpha", "reg_sqrt", "tweedie_variance_power", "monotone_constraints", "max_delta_step",
-      "forced_splits", "position_bins", "eta", "grid_alpha", "grid_beta", "grid_gamma"
+      "forced_splits", "position_bins", "eta", "grid_alpha", "grid_beta", "grid_gamma", "price_gamma"
     });
     std::unordered_map<std::string, std::string> tmp_map;
     for (const auto& pair : *params) {

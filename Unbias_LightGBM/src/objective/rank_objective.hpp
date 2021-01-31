@@ -27,6 +27,7 @@ public:
     grid_alpha_ = static_cast<double>(config.grid_alpha);
     grid_beta_ = static_cast<double>(config.grid_beta);
     grid_gamma_ = static_cast<double>(config.grid_gamma);
+    price_gamma_ = static_cast<double>(config.price_gamma_);
 
     std::cout << "Aplha : " << grid_alpha_ << " , Beta : " << grid_beta_ << " , Gamma : " << grid_gamma_ << std::endl;
 
@@ -107,7 +108,7 @@ public:
     // init position gradients
     InitPositionGradients(); //
     std::cout << "" << std::endl;
-    std::cout << std::setw(10) << "position"
+    /*std::cout << std::setw(10) << "position"
               << std::setw(15) << "bias_i"
               << std::setw(15) << "bias_j"
 
@@ -122,7 +123,7 @@ public:
                 << std::setw(15) << i_costs_[i]
                 << std::setw(15) << j_costs_[i]
                 << std::endl;
-    }
+    } */
   }
 
   void GetGradients(const double* score, score_t* gradients,
@@ -170,6 +171,22 @@ public:
       worst_idx -= 1;
     }
     const double wrost_score = score[sorted_idx[worst_idx]];
+
+    // store bias here
+
+    double item_decay_ = 1.0;
+    double overall_item_decay = 1.0;
+    data_size_t row_item = 0;
+    for (data_size_t i = 0; i < cnt; i++) {
+        overall_item_decay = 1.0;
+        item_decay_ = 1.0;
+        for (data_size_t j = 0; j < i+1 ; j++) {
+            row_item = j / 5;
+            item_decay_ = std::min((pow(grid_beta_, row_item + (grid_gamma_ * item_scores_[j]) + (price_gamma_ * prices_[j]))) * grid_alpha_, 1.0);   // Need to add price here as well
+            overall_item_decay *= item_decay_;
+        }
+        item_attr_bias_[i] = overall_item_decay;
+    }
     // start accmulate lambdas by pairs
     for (data_size_t i = 0; i < cnt; ++i) {
       const data_size_t high = sorted_idx[i];
@@ -182,15 +199,6 @@ public:
       const double high_discount = DCGCalculator::GetDiscount(i); /// 1 / log2(2 + i)
       double high_sum_lambda = 0.0;
       double high_sum_hessian = 0.0;
-
-      double item_decay_high_ = 1.0;
-      double overall_item_decay_high_ = 1.0;
-      int row_item = 0;
-      for (int k = 0; k < high_rank; k++) {
-          row_item = k / 5;
-          item_decay_high_ = std::min((pow(grid_beta_, row_item + (grid_gamma_ * item_scores_[high_rank]))) * grid_alpha_, 1.0);   // Need to add price here as well
-          overall_item_decay_high_ *= item_decay_high_;
-      }
 
       //double high_sum_cost_i = 0.0; ///
       int pair_num = 0; ///
@@ -231,21 +239,11 @@ public:
         p_hessian *= 2 * delta_pair_NDCG;
 
         pair_num += 1;
-        // calculate bias here
 
-        double item_decay_ = 1.0;
-        double overall_item_decay = 1.0;
-        row_item = 0;
-        for (int k = 0; k < low_rank; k++) {
-            row_item = k / 5;
-            item_decay_ = std::min((pow(grid_beta_, row_item + (grid_gamma_ * item_scores_[low_rank]))) * grid_alpha_, 1.0);   // Need to add price here as well
-            overall_item_decay *= item_decay_;
-        }
-
-        high_sum_lambda += p_lambda / overall_item_decay_high_; /// Add lambda to position i
-        high_sum_hessian += p_hessian / overall_item_decay_high_;
-        lambdas[low] -= static_cast<score_t>((p_lambda / overall_item_decay));  /// Minus lambda for position j
-        hessians[low] += static_cast<score_t>((p_hessian) / overall_item_decay);
+        high_sum_lambda += p_lambda / item_attr_bias_[low_rank]; /// Add lambda to position i
+        high_sum_hessian += p_hessian / item_attr_bias_[low_rank];
+        lambdas[low] -= static_cast<score_t>((p_lambda / item_attr_bias_[high_rank]));  /// Minus lambda for position j
+        hessians[low] += static_cast<score_t>((p_hessian) / item_attr_bias_[high_rank]);
       }
       // update
       lambdas[high] += static_cast<score_t>(high_sum_lambda); /// accumulate lambda gradient
@@ -420,6 +418,7 @@ private:
   double grid_beta_;
   /*! \brief grid gamma param */
   double grid_gamma_;
+  double price_gamma_;
   /*! \brief Optimized NDCG@ */
   int optimize_pos_at_;
   /*! \brief Number of queries */
@@ -451,6 +450,8 @@ private:
   mutable std::vector<label_t> i_attr_biases_; /// mutable
 
   mutable std::vector<label_t> j_attr_biases_; ///
+
+  mutable std::vector<double> item_attr_biases_; /// mutable
 
   /*! \brief position cnts */
   mutable std::vector<long long> position_cnts_; ///
