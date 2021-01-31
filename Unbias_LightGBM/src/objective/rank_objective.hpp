@@ -167,7 +167,7 @@ public:
         item_decay_ = 1.0;
         for (data_size_t j = 0; j < i+1 ; j++) {
             row_item = j / 5;
-            item_decay_ = std::min((pow(grid_beta_, row_item + (grid_gamma_ * item_scores_[j]) + (price_gamma_ * prices_[j]))) * grid_alpha_, 1.0);   // Need to add price here as well
+            item_decay_ = std::min((pow(grid_beta_, row_item + (grid_gamma_ * item_scores_[start + j]) + (price_gamma_ * prices_[start + j]))) * grid_alpha_, 1.0);   // Need to add price here as well
             overall_item_decay *= item_decay_;
         }
         item_attr_bias_[i] = overall_item_decay;
