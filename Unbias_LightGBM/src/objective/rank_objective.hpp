@@ -295,6 +295,8 @@ public:
     j_biases_.resize(_position_bins);
     j_biases_pow_.resize(_position_bins);
 
+    item_attr_bias_.resize(_position_bins);
+
     // Adding attribute prob score bias init here
 
     i_attr_biases_.resize(_position_bins);
@@ -308,6 +310,7 @@ public:
 
       i_attr_biases_[i] = 1.0f;
       j_attr_biases_[i] = 1.0f;
+      item_attr_bias_[i] = 1.0f;
     }
   }
 
@@ -374,12 +377,10 @@ public:
     std::cout << "eta: " << _eta << std::endl;
     std::cout << std::setw(10) << "position"
               << std::setw(15) << "bias_i"
-              << std::setw(15) << "bias_j"
               << std::endl;
     for (size_t i = 0; i < _position_bins; ++i) { ///
       std::cout << std::setw(10) << i
-                << std::setw(15) << i_attr_biases_[i]
-                << std::setw(15) << j_attr_biases_[i]
+                << std::setw(15) << item_attr_bias_[i]
                 << std::endl;
     }
 
